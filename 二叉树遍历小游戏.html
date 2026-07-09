@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二叉树遍历</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2a3c7f);
+            color: #f0f0f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+        
+        .stats-bar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            z-index: 100;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .stats-bar h3 {
+            margin-bottom: 8px;
+            color: #4facfe;
+            font-size: 1.3rem;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+        }
+        
+        .tree-container {
+            flex: 1 1 600px;
+            min-width: 300px;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .tree-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #00f2fe;
+            flex-shrink: 0;
+        }
+        
+        .tree-image-wrapper {
+            flex: 1;
+            min-height: 300px;
+            max-height: 500px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+        
+        .tree-svg-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: visible;
+        }
+        
+        .tree-svg {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+        }
+        
+        .tree-node {
+            fill: #4facfe;
+            stroke: #fff;
+            stroke-width: 2;
+        }
+        
+        .tree-node-text {
+            fill: white;
+            font-size: 12px;
+            font-weight: bold;
+            text-anchor: middle;
+            dominant-baseline: central;
+        }
+        
+        .tree-line {
+            stroke: #00f2fe;
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        .input-container {
+            flex: 1 1 500px;
+            min-width: 300px;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .input-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #00f2fe;
+        }
+        
+        .traversal-input {
+            margin-bottom: 25px;
+        }
+        
+        .traversal-label {
+            display: block;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: #4facfe;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 1.1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #00f2fe;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 15px;
+        }
+        
+        button {
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            flex: 1;
+        }
+        
+        #submitBtn {
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            color: white;
+        }
+        
+        #submitBtn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(0, 242, 254, 0.4);
+        }
+        
+        #nextBtn {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            color: white;
+        }
+        
+        #nextBtn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(150, 201, 61, 0.4);
+        }
+        
+        #nextBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .hint {
+            margin-top: 25px;
+            padding: 15px;
+            background: rgba(0, 242, 254, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #00f2fe;
+        }
+        
+        .hint h4 {
+            color: #00f2fe;
+            margin-bottom: 8px;
+        }
+        
+        .hint ul {
+            padding-left: 20px;
+        }
+        
+        .hint li {
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s;
+        }
+        
+        .result.success {
+            background: rgba(0, 255, 0, 0.15);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            color: #00ff00;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .result.error {
+            background: rgba(255, 0, 0, 0.15);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            color: #ff5555;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .zoom-controls {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .zoom-btn:hover {
+            background: rgba(79, 172, 254, 0.8);
+            transform: scale(1.1);
+        }
+        
+        @media (max-width: 1200px) {
+            .game-area {
+                gap: 20px;
+            }
+            
+            .tree-container {
+                max-width: 700px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .game-area {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tree-container, .input-container {
+                max-width: 100%;
+                width: 100%;
+            }
+            
+            .tree-image-wrapper {
+                min-height: 350px;
+            }
+            
+            .stats-bar {
+                position: static;
+                margin-bottom: 20px;
+                width: 100%;
+                max-width: 400px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .tree-image-wrapper {
+                min-height: 300px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .tree-title, .input-title {
+                font-size: 1.6rem;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .tree-image-wrapper {
+                min-height: 250px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .tree-title, .input-title {
+                font-size: 1.4rem;
+            }
+            
+            .traversal-label {
+                font-size: 1.1rem;
+            }
+            
+            .input-field {
+                padding: 10px 12px;
+                font-size: 1rem;
+            }
+            
+            .zoom-controls {
+                bottom: 10px;
+                right: 10px;
+            }
+            
+            .zoom-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 1.3rem;
+            }
+        }
+        
+        @media (max-height: 700px) {
+            .tree-image-wrapper {
+                min-height: 250px;
+                max-height: 350px;
+            }
+        }
+        
+        /* 小屏幕横向模式优化 */
+        @media (max-width: 850px) and (orientation: landscape) {
+            .tree-image-wrapper {
+                min-height: 200px;
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>二叉树遍历</h1>
+            <p class="subtitle">观察右侧的二叉树结构，在下方输入对应的先序、中序和后序遍历序列。节点值之间用逗号分隔（如：A,B,C）。答案不区分大小写。</p>
+        </header>
+        
+        <div class="stats-bar">
+            <h3>游戏进度</h3>
+            <div>已通过关卡: <span id="passedLevels">0</span></div>
+            <div>当前关卡: <span id="currentLevel">1</span></div>
+        </div>
+        
+        <div class="game-area">
+            <div class="tree-container">
+                <h2 class="tree-title">二叉树结构图</h2>
+                <div class="tree-image-wrapper">
+                    <div class="tree-svg-container">
+                        <svg id="treeSvg" class="tree-svg" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet"></svg>
+                    </div>
+                    <div class="zoom-controls">
+                        <div class="zoom-btn" id="zoomInBtn">+</div>
+                        <div class="zoom-btn" id="zoomOutBtn">-</div>
+                        <div class="zoom-btn" id="resetZoomBtn">↺</div>
+                    </div>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #4facfe;"></div>
+                        <span>树节点</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #00f2fe;"></div>
+                        <span>连接线</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="input-container">
+                <h2 class="input-title">输入遍历序列</h2>
+                
+                <div class="traversal-input">
+                    <label class="traversal-label">先序遍历 (根左右)</label>
+                    <input type="text" id="preorderInput" class="input-field" placeholder="例如: A,B,C,D,E">
+                </div>
+                
+                <div class="traversal-input">
+                    <label class="traversal-label">中序遍历 (左根右)</label>
+                    <input type="text" id="inorderInput" class="input-field" placeholder="例如: C,B,A,D,E">
+                </div>
+                
+                <div class="traversal-input">
+                    <label class="traversal-label">后序遍历 (左右根)</label>
+                    <input type="text" id="postorderInput" class="input-field" placeholder="例如: C,B,E,D,A">
+                </div>
+                
+                <div class="buttons">
+                    <button id="submitBtn">提交答案</button>
+                    <button id="nextBtn" disabled>下一关</button>
+                </div>
+                
+                <div id="resultMessage" class="result"></div>
+                
+                <div class="hint">
+                    <h4>遍历规则提示</h4>
+                    <ul>
+                        <li><strong>先序(Preorder)</strong>: 根节点 → 左子树 → 右子树</li>
+                        <li><strong>中序(Inorder)</strong>: 左子树 → 根节点 → 右子树</li>
+                        <li><strong>后序(Postorder)</strong>: 左子树 → 右子树 → 根节点</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 游戏状态
+        const gameState = {
+            currentLevel: 1,
+            passedLevels: 0,
+            totalLevels: 10,
+            currentTree: null,
+            zoomLevel: 1.0
+        };
+
+        // 二叉树定义
+        class TreeNode {
+            constructor(value, left = null, right = null) {
+                this.value = value;
+                this.left = left;
+                this.right = right;
+            }
+        }
+
+        // 预定义的二叉树集合（10个关卡）
+        const treeDefinitions = [
+            // 关卡1：简单的三节点树
+            { root: new TreeNode('A', new TreeNode('B'), new TreeNode('C')) },
+            
+            // 关卡2：四个节点的树
+            { root: new TreeNode('A', new TreeNode('B', new TreeNode('C')), new TreeNode('D')) },
+            
+            // 关卡3：五个节点的树
+            { root: new TreeNode('A', new TreeNode('B', new TreeNode('C'), new TreeNode('D')), new TreeNode('E')) },
+            
+            // 关卡4：六个节点的树
+            { root: new TreeNode('A', 
+                new TreeNode('B', new TreeNode('D'), new TreeNode('E')), 
+                new TreeNode('C', null, new TreeNode('F'))) },
+            
+            // 关卡5：七个节点的树
+            { root: new TreeNode('A',
+                new TreeNode('B', new TreeNode('D'), new TreeNode('E')),
+                new TreeNode('C', new TreeNode('F'), new TreeNode('G'))) },
+            
+            // 关卡6：更复杂的树
+            { root: new TreeNode('A',
+                new TreeNode('B', new TreeNode('D'), new TreeNode('E', new TreeNode('H'))),
+                new TreeNode('C', new TreeNode('F'), new TreeNode('G'))) },
+            
+            // 关卡7：不平衡树
+            { root: new TreeNode('A',
+                new TreeNode('B', new TreeNode('D', new TreeNode('F'), new TreeNode('G')), new TreeNode('E')),
+                new TreeNode('C')) },
+            
+            // 关卡8：完全二叉树
+            { root: new TreeNode('A',
+                new TreeNode('B', new TreeNode('D'), new TreeNode('E')),
+                new TreeNode('C', new TreeNode('F'), new TreeNode('G'))) },
+            
+            // 关卡9：较大的树
+            { root: new TreeNode('A',
+                new TreeNode('B', 
+                    new TreeNode('D', new TreeNode('H'), new TreeNode('I')),
+                    new TreeNode('E', new TreeNode('J'), new TreeNode('K'))),
+                new TreeNode('C',
+                    new TreeNode('F', new TreeNode('L')),
+                    new TreeNode('G'))) },
+            
+            // 关卡10：挑战关卡
+            { root: new TreeNode('A',
+                new TreeNode('B',
+                    new TreeNode('D', new TreeNode('H'), new TreeNode('I')),
+                    new TreeNode('E', new TreeNode('J'), new TreeNode('K'))),
+                new TreeNode('C',
+                    new TreeNode('F', new TreeNode('L'), new TreeNode('M')),
+                    new TreeNode('G', new TreeNode('N'), new TreeNode('O')))) }
+        ];
+
+        // 遍历函数
+        function preorderTraversal(root) {
+            if (!root) return [];
+            return [root.value, ...preorderTraversal(root.left), ...preorderTraversal(root.right)];
+        }
+
+        function inorderTraversal(root) {
+            if (!root) return [];
+            return [...inorderTraversal(root.left), root.value, ...inorderTraversal(root.right)];
+        }
+
+        function postorderTraversal(root) {
+            if (!root) return [];
+            return [...postorderTraversal(root.left), ...postorderTraversal(root.right), root.value];
+        }
+
+        // 从localStorage加载游戏状态
+        function loadGameState() {
+            const savedState = localStorage.getItem('binaryTreeGameState');
+            if (savedState) {
+                const parsedState = JSON.parse(savedState);
+                gameState.currentLevel = parsedState.currentLevel || 1;
+                gameState.passedLevels = parsedState.passedLevels || 0;
+            }
+            
+            // 更新显示
+            document.getElementById('currentLevel').textContent = gameState.currentLevel;
+            document.getElementById('passedLevels').textContent = gameState.passedLevels;
+        }
+
+        // 保存游戏状态到localStorage
+        function saveGameState() {
+            localStorage.setItem('binaryTreeGameState', JSON.stringify({
+                currentLevel: gameState.currentLevel,
+                passedLevels: gameState.passedLevels
+            }));
+        }
+
+        // 计算树的最大深度
+        function getTreeDepth(node) {
+            if (!node) return 0;
+            return 1 + Math.max(getTreeDepth(node.left), getTreeDepth(node.right));
+        }
+
+        // 计算树的最大宽度（节点数）
+        function getTreeWidth(node) {
+            if (!node) return 0;
+            return 1 + getTreeWidth(node.left) + getTreeWidth(node.right);
+        }
+
+        // 计算节点位置 - 动态调整间距
+        function calculateNodePositions(node, x, y, positions = {}, depth = 1) {
+            if (!node) return positions;
+            
+            const treeDepth = getTreeDepth(gameState.currentTree);
+            const treeWidth = getTreeWidth(gameState.currentTree);
+            
+            // 动态计算水平和垂直间距
+            const baseSpacing = Math.max(50, 800 / (treeDepth + 3));
+            const horizontalSpacing = baseSpacing * (treeDepth / 4);
+            const verticalSpacing = Math.max(60, 400 / treeDepth);
+            
+            positions[node.value] = { x, y, depth };
+            
+            // 根据树的复杂度调整左右子节点的位置
+            if (node.left) {
+                const leftOffset = horizontalSpacing / Math.pow(1.5, depth - 1);
+                calculateNodePositions(node.left, x - leftOffset, y + verticalSpacing, positions, depth + 1);
+            }
+            
+            if (node.right) {
+                const rightOffset = horizontalSpacing / Math.pow(1.5, depth - 1);
+                calculateNodePositions(node.right, x + rightOffset, y + verticalSpacing, positions, depth + 1);
+            }
+            
+            return positions;
+        }
+
+        // 绘制二叉树
+        function drawBinaryTree(root) {
+            const svg = document.getElementById('treeSvg');
+            svg.innerHTML = '';
+            
+            // 获取树的最大深度和宽度
+            const treeDepth = getTreeDepth(root);
+            const treeWidth = getTreeWidth(root);
+            
+            // 动态调整SVG viewBox大小
+            const viewBoxWidth = Math.max(800, treeWidth * 60);
+            const viewBoxHeight = Math.max(400, treeDepth * 80);
+            svg.setAttribute('viewBox', `0 0 ${viewBoxWidth} ${viewBoxHeight}`);
+            
+            // 计算根节点位置（居中）
+            const rootX = viewBoxWidth / 2;
+            const rootY = 50;
+            
+            // 计算所有节点位置
+            const nodePositions = calculateNodePositions(root, rootX, rootY);
+            
+            // 绘制连接线
+            drawTreeLines(svg, root, nodePositions);
+            
+            // 绘制节点
+            drawTreeNodes(svg, nodePositions, treeDepth);
+        }
+
+        // 绘制树连接线
+        function drawTreeLines(svg, node, positions, parentPos = null) {
+            if (!node) return;
+            
+            const nodePos = positions[node.value];
+            
+            // 绘制到父节点的线
+            if (parentPos) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', parentPos.x);
+                line.setAttribute('y1', parentPos.y);
+                line.setAttribute('x2', nodePos.x);
+                line.setAttribute('y2', nodePos.y);
+                line.setAttribute('class', 'tree-line');
+                svg.appendChild(line);
+            }
+            
+            // 递归绘制子节点
+            if (node.left) {
+                drawTreeLines(svg, node.left, positions, nodePos);
+            }
+            
+            if (node.right) {
+                drawTreeLines(svg, node.right, positions, nodePos);
+            }
+        }
+
+        // 绘制树节点 - 根据树深度动态调整节点大小
+        function drawTreeNodes(svg, positions, treeDepth) {
+            // 根据树深度动态调整节点半径
+            const baseRadius = Math.max(15, 20 - treeDepth * 0.5);
+            const fontSize = Math.max(10, 12 - treeDepth * 0.3);
+            
+            for (const [value, pos] of Object.entries(positions)) {
+                // 绘制节点圆圈
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', pos.x);
+                circle.setAttribute('cy', pos.y);
+                circle.setAttribute('r', baseRadius);
+                circle.setAttribute('class', 'tree-node');
+                svg.appendChild(circle);
+                
+                // 绘制节点文本
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', pos.x);
+                text.setAttribute('y', pos.y);
+                text.setAttribute('class', 'tree-node-text');
+                text.setAttribute('font-size', fontSize);
+                text.textContent = value;
+                svg.appendChild(text);
+            }
+        }
+
+        // 缩放控制
+        function setupZoomControls() {
+            const svg = document.getElementById('treeSvg');
+            const zoomInBtn = document.getElementById('zoomInBtn');
+            const zoomOutBtn = document.getElementById('zoomOutBtn');
+            const resetZoomBtn = document.getElementById('resetZoomBtn');
+            
+            zoomInBtn.addEventListener('click', () => {
+                gameState.zoomLevel = Math.min(2.0, gameState.zoomLevel + 0.2);
+                applyZoom();
+            });
+            
+            zoomOutBtn.addEventListener('click', () => {
+                gameState.zoomLevel = Math.max(0.5, gameState.zoomLevel - 0.2);
+                applyZoom();
+            });
+            
+            resetZoomBtn.addEventListener('click', () => {
+                gameState.zoomLevel = 1.0;
+                applyZoom();
+            });
+            
+            function applyZoom() {
+                const container = document.querySelector('.tree-svg-container');
+                container.style.transform = `scale(${gameState.zoomLevel})`;
+                container.style.transformOrigin = 'center';
+            }
+        }
+
+        // 初始化关卡
+        function initLevel(level) {
+            // 确保关卡在有效范围内
+            const levelIndex = Math.min(level - 1, treeDefinitions.length - 1);
+            gameState.currentTree = treeDefinitions[levelIndex].root;
+            
+            // 绘制树
+            drawBinaryTree(gameState.currentTree);
+            
+            // 重置缩放
+            gameState.zoomLevel = 1.0;
+            const container = document.querySelector('.tree-svg-container');
+            container.style.transform = 'scale(1)';
+            
+            // 清空输入框和结果信息
+            document.getElementById('preorderInput').value = '';
+            document.getElementById('inorderInput').value = '';
+            document.getElementById('postorderInput').value = '';
+            document.getElementById('resultMessage').className = 'result';
+            document.getElementById('resultMessage').textContent = '';
+            
+            // 禁用下一关按钮
+            document.getElementById('nextBtn').disabled = true;
+            
+            // 更新显示
+            document.getElementById('currentLevel').textContent = gameState.currentLevel;
+        }
+
+        // 检查答案
+        function checkAnswers() {
+            const preorderAnswer = document.getElementById('preorderInput').value.trim().toUpperCase();
+            const inorderAnswer = document.getElementById('inorderInput').value.trim().toUpperCase();
+            const postorderAnswer = document.getElementById('postorderInput').value.trim().toUpperCase();
+            
+            // 计算正确答案
+            const correctPreorder = preorderTraversal(gameState.currentTree).join(',');
+            const correctInorder = inorderTraversal(gameState.currentTree).join(',');
+            const correctPostorder = postorderTraversal(gameState.currentTree).join(',');
+            
+            // 验证答案
+            const preorderCorrect = preorderAnswer === correctPreorder;
+            const inorderCorrect = inorderAnswer === correctInorder;
+            const postorderCorrect = postorderAnswer === correctPostorder;
+            
+            const allCorrect = preorderCorrect && inorderCorrect && postorderCorrect;
+            
+            // 显示结果
+            const resultElement = document.getElementById('resultMessage');
+            
+            if (allCorrect) {
+                resultElement.textContent = '恭喜！所有遍历序列都正确！';
+                resultElement.className = 'result success';
+                
+                // 如果这是新通过的关卡，更新通过关卡数
+                if (gameState.currentLevel > gameState.passedLevels) {
+                    gameState.passedLevels = gameState.currentLevel;
+                    document.getElementById('passedLevels').textContent = gameState.passedLevels;
+                }
+                
+                // 启用下一关按钮
+                document.getElementById('nextBtn').disabled = false;
+                
+                // 保存游戏状态
+                saveGameState();
+            } else {
+                let errorMsg = '答案有误：';
+                const errors = [];
+                
+                if (!preorderCorrect) errors.push('先序遍历');
+                if (!inorderCorrect) errors.push('中序遍历');
+                if (!postorderCorrect) errors.push('后序遍历');
+                
+                errorMsg += errors.join('、');
+                resultElement.textContent = errorMsg;
+                resultElement.className = 'result error';
+            }
+        }
+
+        // 进入下一关
+        function nextLevel() {
+            if (gameState.currentLevel < gameState.totalLevels) {
+                gameState.currentLevel++;
+                initLevel(gameState.currentLevel);
+                saveGameState();
+            } else {
+                // 所有关卡已完成
+                document.getElementById('resultMessage').textContent = '太棒了！你已经完成了所有关卡！';
+                document.getElementById('resultMessage').className = 'result success';
+                document.getElementById('nextBtn').disabled = true;
+            }
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载游戏状态
+            loadGameState();
+            
+            // 初始化当前关卡
+            initLevel(gameState.currentLevel);
+            
+            // 设置按钮事件
+            document.getElementById('submitBtn').addEventListener('click', checkAnswers);
+            document.getElementById('nextBtn').addEventListener('click', nextLevel);
+            
+            // 设置缩放控制
+            setupZoomControls();
+            
+            // 允许按Enter键提交
+            document.getElementById('preorderInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') checkAnswers();
+            });
+            
+            document.getElementById('inorderInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') checkAnswers();
+            });
+            
+            document.getElementById('postorderInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') checkAnswers();
+            });
+            
+            // 添加键盘快捷键
+            document.addEventListener('keydown', function(e) {
+                // Ctrl + '+' 放大
+                if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '=')) {
+                    e.preventDefault();
+                    document.getElementById('zoomInBtn').click();
+                }
+                // Ctrl + '-' 缩小
+                else if ((e.ctrlKey || e.metaKey) && e.key === '-') {
+                    e.preventDefault();
+                    document.getElementById('zoomOutBtn').click();
+                }
+                // Ctrl + '0' 重置缩放
+                else if ((e.ctrlKey || e.metaKey) && e.key === '0') {
+                    e.preventDefault();
+                    document.getElementById('resetZoomBtn').click();
+                }
+            });
+        });
+
+        // 处理窗口大小变化时重新绘制树
+        window.addEventListener('resize', function() {
+            if (gameState.currentTree) {
+                // 使用防抖技术避免频繁重绘
+                clearTimeout(window.resizeTimer);
+                window.resizeTimer = setTimeout(() => {
+                    drawBinaryTree(gameState.currentTree);
+                }, 200);
+            }
+        });
+    </script>
+</body>
+</html>
